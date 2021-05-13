@@ -24,7 +24,7 @@ app.use((error, req, res, next) => {
     message: error.message,
   });
 });
-////////////
+//////////
 
 const { PORT, DB_HOST } = process.env;
 const port = PORT || 3000;
