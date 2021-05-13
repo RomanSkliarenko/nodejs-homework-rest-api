@@ -6,17 +6,20 @@ const contactSchema = Schema({
   },
   email: {
     type: String,
+    pattern: "^\\S+@\\S+\\.\\S+$",
+    format: "email",
+    minLength: 6,
+    maxLength: 127,
     required: [true, "Email must be exist!"],
+    unique: true,
   },
   phone: {
     type: Number,
     required: [true, "Phone must be exist!"],
   },
-  password: {
-    type: String,
-    required: false,
-    minLength: 6,
-    match: /^[A-Z]{3}[1-9]{3}$/g,
+  favorite: {
+    type: Boolean,
+    default: false,
   },
 });
 

@@ -1,19 +1,39 @@
 const { Contact } = require("../model");
 
-const getAll = (query) => {
-  return Contact.find(query);
+const getAll = () => {
+  return Contact.find();
 };
-
 const getOne = (id) => {
   return Contact.findOne({ _id: id });
 };
-
-const add = (newContact) => {
-  return Contact.create(newContact);
+const update = (id, body) => {
+  return Contact.updateOne({ _id: id }, body, { upsert: true });
+};
+const patchContact = (id, body) => {
+  const { favorite } = body;
+  console.log(favorite);
+  return favorite || favorite === false
+    ? Contact.updateOne({ _id: id }, { $set: { favorite } })
+    : { message: "missing field favorite" };
+};
+const create = (body) => {
+  const { favorite } = body;
+  const newContactWithStatus = {
+    ...body,
+    favorite: favorite ? favorite : false,
+  };
+  const newContact = new Contact(newContactWithStatus);
+  return newContact.save();
+};
+const deleteOne = (id) => {
+  return Contact.findByIdAndRemove(id);
 };
 
 module.exports = {
-  add,
+  deleteOne,
+  patchContact,
   getAll,
   getOne,
+  update,
+  create,
 };
