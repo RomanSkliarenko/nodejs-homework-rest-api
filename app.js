@@ -1,25 +1,43 @@
+const mongoose = require("mongoose");
 const express = require("express");
-const logger = require("morgan");
+require("dotenv").config();
 const cors = require("cors");
-
-const contactsRouter = require("./routes/api/contacts");
+const contactsApi = require("./api");
 
 const app = express();
-
-const formatsLogger = app.get("env") === "development" ? "dev" : "short";
-
-app.use(logger(formatsLogger));
 app.use(cors());
-app.use(express.json());
+app.use("/contacts", contactsApi);
 
-app.use("/api/contacts", contactsRouter);
-
+///обработка ошибок
 app.use((req, res) => {
-  res.status(404).json({ message: "Not found" });
+  res.status(400).json({
+    status: "error",
+    code: 404,
+    message: "Page not found",
+  });
+});
+app.use((error, req, res, next) => {
+  const code = error.code || 500;
+  res.status(500).json({
+    status: "fail",
+    code,
+    message: error.message,
+  });
+});
+//////////
+
+const { PORT, DB_HOST } = process.env;
+const port = PORT || 3000;
+const dbConnect = mongoose.connect(DB_HOST, {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
 });
 
-app.use((err, req, res, next) => {
-  res.status(500).json({ message: err.message });
-});
-
-module.exports = app;
+dbConnect
+  .then(() => {
+    console.log("Database connection successful");
+    app.listen(port, () => console.log("Server is running"));
+  })
+  .catch((error) => console.log(error));
