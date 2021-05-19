@@ -11,7 +11,6 @@ const update = (id, body) => {
 };
 const patchContact = (id, body) => {
   const { favorite } = body;
-  console.log(favorite);
   return favorite || favorite === false
     ? Contact.updateOne({ _id: id }, { $set: { favorite } })
     : { message: "missing field favorite" };
