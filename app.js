@@ -7,7 +7,8 @@ const usersApi = require("./api");
 
 const app = express();
 app.use(cors());
-require("./configs/config-passport");
+// require("./configs/config-passport");
+
 app.use("/contacts", contactsApi);
 app.use("/users", usersApi);
 
@@ -24,7 +25,7 @@ app.use((error, req, res, next) => {
   res.status(500).json({
     status: "fail",
     code,
-    message: error.message,
+    message: error,
   });
 });
 //////////
