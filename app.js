@@ -3,11 +3,11 @@ const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
 const contactsApi = require("./api");
-const usersApi = require("./api");
+const usersApi = require("./api/users");
 
 const app = express();
 app.use(cors());
-// require("./configs/config-passport");
+require("./configs/config-passport");
 
 app.use("/contacts", contactsApi);
 app.use("/users", usersApi);

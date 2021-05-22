@@ -1,11 +1,12 @@
 const express = require("express");
+const auth = require("../configs/authorization");
 
 const { contactsCtrl } = require("../controllers");
 const router = express.Router();
 
-router.get("/", contactsCtrl.getAll);
+router.get("/", auth, contactsCtrl.getAll);
 
-router.get("/:id", contactsCtrl.getOne);
+router.get("/:id", auth, contactsCtrl.getOne);
 
 router.post("/", express.json(), contactsCtrl.create);
 

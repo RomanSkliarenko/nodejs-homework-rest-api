@@ -15,15 +15,11 @@ const params = {
 
 passport.use(
   new Strategy(params, async (payload, done) => {
-    console.log("try find error 1"); //поиск ошибки
-
-    try {
-      console.log("try find error 2"); //поиск ошибки
-      const user = await User.findOne({ _id: payload.id });
-      done(null, user);
-    } catch (error) {
-      console.log("try find error 3"); //поиск ошибки
-      done(error);
+    const newUser = await User.findById(payload.id);
+    if (newUser && newUser.token) {
+      return done(null, newUser);
+    } else {
+      return done(null, false);
     }
   })
 );
