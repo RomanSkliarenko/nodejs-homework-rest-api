@@ -1,5 +1,8 @@
 const { usersService } = require("../services");
 const jwt = require("jsonwebtoken");
+const path = require("path");
+const fs = require("fs");
+const Jimp = require("jimp");
 
 const logout = async (req, res, next) => {
   const { user } = req;
@@ -87,10 +90,41 @@ const current = async (req, res, next) => {
     },
   });
 };
+const avatars = async (req, res, next) => {
+  const now = new Date();
+  const prefix = `${now.getFullYear()}-${
+    now.getMonth() + 1
+  }-${now.getDate()}-${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+  const { path: temporaryName, originalname } = req.file;
+  const { user, file } = req;
+  const avatarsDir = path.join(process.cwd(), "public", "avatars");
+  const filePathName = path.join(avatarsDir, `${prefix}_${originalname}`);
+  const img = await Jimp.read(temporaryName);
+  await img
+    .autocrop()
+    .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE)
+    .writeAsync(temporaryName);
+  await fs.rename(temporaryName, filePathName, (err) => {
+    if (err) {
+      console.log(err);
+    }
+  });
+
+  await usersService.updateAvatar(user._id, filePathName);
+  const userWithUpdtAvatar = await usersService.getOne(user.email);
+  return res.status(200).json({
+    status: "ok",
+    code: 200,
+    user: {
+      avatarURL: userWithUpdtAvatar.avatarURL,
+    },
+  });
+};
 
 module.exports = {
   logout,
   signup,
   login,
   current,
+  avatars,
 };

@@ -4,13 +4,17 @@ require("dotenv").config();
 const cors = require("cors");
 const contactsApi = require("./api");
 const usersApi = require("./api/users");
+const uploadApi = require("./api/upload");
+const path = require("path");
 
 const app = express();
+app.use(express.static(path.join(__dirname + "/public")));
 app.use(cors());
 require("./configs/config-passport");
 
 app.use("/contacts", contactsApi);
 app.use("/users", usersApi);
+app.use("/upload", uploadApi);
 
 ///обработка ошибок
 app.use((req, res) => {

@@ -9,6 +9,9 @@ const getOne = (email) => {
 const updateToken = (id, token) => {
   return User.findByIdAndUpdate(id, { token }, { new: true });
 };
+const updateAvatar = (id, avatarURL) => {
+  return User.findByIdAndUpdate(id, { avatarURL }, { new: true });
+};
 const create = async (body) => {
   const { login, email, password } = body;
   const newUser = new User({ login, email });
@@ -21,4 +24,5 @@ module.exports = {
   getOne,
   updateToken,
   create,
+  updateAvatar,
 };
