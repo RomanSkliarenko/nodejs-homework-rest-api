@@ -6,6 +6,9 @@ const logout = (user) => {
 const getOne = (email) => {
   return User.findOne({ email });
 };
+const getUserVerifi = (verifyToken) => {
+  return User.findOne({ verifyToken });
+};
 const updateToken = (id, token) => {
   return User.findByIdAndUpdate(id, { token }, { new: true });
 };
@@ -18,6 +21,12 @@ const create = async (body) => {
   await newUser.setPassword(password);
   await newUser.save();
 };
+const updateVerifyToken = (id) => {
+  return User.findByIdAndUpdate(id, { verifyToken: null }, { new: true });
+};
+const updateVerify = (id) => {
+  return User.findByIdAndUpdate(id, { verify: true }, { new: true });
+};
 
 module.exports = {
   logout,
@@ -25,4 +34,7 @@ module.exports = {
   updateToken,
   create,
   updateAvatar,
+  getUserVerifi,
+  updateVerifyToken,
+  updateVerify,
 };

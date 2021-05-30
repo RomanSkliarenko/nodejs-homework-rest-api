@@ -7,6 +7,10 @@ const upload = require("../services/upload");
 const auth = require("../configs/authorization");
 const router = express.Router();
 
+router.get("/verify/:verificationToken", usersCtrl.verify);
+
+router.post("/verify", usersCtrl.repeatVerify);
+
 router.post("/logout", auth, usersCtrl.logout);
 
 router.get("/current", auth, usersCtrl.current);
