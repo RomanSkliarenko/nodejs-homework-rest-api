@@ -3,7 +3,76 @@ const jwt = require("jsonwebtoken");
 const path = require("path");
 const fs = require("fs");
 const Jimp = require("jimp");
+const sgMail = require("../sendgrid/sendgrid");
 
+const verify = async (req, res, next) => {
+  const { verificationToken } = req.params;
+  const getUserVerifi = await usersService.getUserVerifi(verificationToken);
+  await usersService.updateVerifyToken(getUserVerifi._id);
+  await usersService.updateVerify(getUserVerifi._id);
+
+  getUserVerifi
+    ? res.status(200).json({
+        status: "ok",
+        code: 200,
+        ResponseBody: {
+          message: "Verification successful",
+        },
+      })
+    : res.status(404).json({
+        status: "Not Found",
+        code: 404,
+        ResponseBody: {
+          message: "User not found",
+        },
+      });
+};
+const repeatVerify = async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({
+      status: "Error",
+      code: 400,
+      ResponseBody: {
+        message: "missing required field email",
+      },
+    });
+  }
+  const user = await usersService.getOne(email);
+  if (user && !user.verify && user.verifyToken) {
+    //отправляем письмо
+    const veifyMessage = {
+      to: email,
+      from: "vurtnevk@gmail.com",
+      subject: "Verify your email",
+      text: "To verify your email follow this link",
+      html: `<a>http://localhost:3000/users/verify/${user.verifyToken}</a>`,
+    };
+    await sgMail
+      .send(veifyMessage)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    /////////////
+    res.status(200).json({
+      status: "ok",
+      ResponseBody: {
+        message: "Verification email sent",
+      },
+    });
+  }
+  if (user && user.verify) {
+    res.status(400).json({
+      status: "Bad Request",
+      ResponseBody: {
+        message: "Verification has already been passed",
+      },
+    });
+  }
+};
 const logout = async (req, res, next) => {
   const { user } = req;
 
@@ -21,6 +90,15 @@ const logout = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await usersService.getOne(email);
+
+  if (!user.verify) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Your email is not verifyed yet",
+      data: "Please verify your email",
+    });
+  }
 
   if (!user || !user.validPassword(password)) {
     return res.status(400).json({
@@ -63,6 +141,21 @@ const signup = async (req, res, next) => {
   try {
     await usersService.create(req.body);
     const newUser = await usersService.getOne(email);
+    const veifyMessage = {
+      to: newUser.email,
+      from: "vurtnevk@gmail.com",
+      subject: "Verify your email",
+      text: "To verify your email follow this link",
+      html: `<a>http://localhost:3000/users/verify/${newUser.verifyToken}</a>`,
+    };
+    await sgMail
+      .send(veifyMessage)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
     newUser
       ? res.status(201).json({
           status: "Created",
@@ -127,4 +220,6 @@ module.exports = {
   login,
   current,
   avatars,
+  verify,
+  repeatVerify,
 };
